@@ -1,3 +1,11 @@
+const sourceS3 = {
+  resolve: "gatsby-source-s3-image",
+  options: {
+    bucketName: "rp-photo-uploads",
+    protocol: "https", // [optional] Default to `https`.
+    region: "us-west-1",
+  },
+}
 module.exports = {
   siteMetadata: {
     title: `Gatsby Default Starter`,
@@ -5,6 +13,7 @@ module.exports = {
     author: `@gatsbyjs`,
   },
   plugins: [
+    sourceS3,
     `gatsby-plugin-react-helmet`,
     {
       resolve: `gatsby-source-filesystem`,

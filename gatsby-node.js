@@ -5,3 +5,22 @@
  */
 
 // You can delete this file if you're not using it
+const photographyQuery = graphql`
+  {
+    allS3ImageAsset {
+      edges {
+        node {
+          ETag
+          EXIF {
+            DateCreatedISO
+          }
+          childImageSharp {
+            fluid {
+              ...GatsbyImageSharpFluid_tracedSVG
+            }
+          }
+        }
+      }
+    }
+  }
+`
