@@ -4,70 +4,53 @@ import SEO from "../components/boilerplate/seo"
 import { useStaticQuery, graphql } from "gatsby"
 import GatsbyImage from "gatsby-image"
 import { ParallaxProvider, Parallax } from "react-scroll-parallax"
-import BackgroundSlider from "gatsby-image-background-slider"
 import styled from "styled-components"
 
-function useInterval(callback: CallableFunction, delay: number) {
-  const savedCallback = useRef<any>()
-
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback
-  }, [callback])
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current()
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay)
-      return () => clearInterval(id)
-    }
-  }, [delay])
-}
-
-const Slide = styled.div<{ visible: boolean }>`
-  height: 100vh;
+const Slide = styled(GatsbyImage)<{ visible: boolean }>`
   max-height: 100%;
   background: white;
   overflow: hidden;
-  width: 100%;
-  transition: opacity 300ms ease-in;
-  opacity: ${visible => (visible ? `1` : `0`)};
+  width: inherit;
+  height: inherit;
+  transition: opacity 750ms ease-in-out, transform 750ms ease-in-out;
+  opacity: ${props => (props.visible ? `1` : `0`)};
+  transform: ${props =>
+    props.visible
+      ? ``
+      : `translate(${Math.floor(Math.random() * 50) *
+          (Math.round(Math.random()) ? -1 : 1)}px, ${Math.floor(
+          Math.random() * 50
+        ) * (Math.round(Math.random()) ? -1 : 1)}px) scale(1.1)`};
 `
 const SlideContainer = styled.div`
   overflow: hidden;
   width: 100vw;
+  height: 100vh;
   display: flex;
 `
 const Carousel = (props: any) => {
   const { photos } = props
   const [index, setIndex] = useState(0)
+  const [fade, setFade] = useState(true)
+  const photoDuration = 5000
 
-  useInterval(() => {
-    setIndex((index + 1) % photos.length)
-  }, 5000)
-
-  const GeneratedSlide = (props: { image: any }) => {
-    const { image } = props
-    const [fade, setFade] = useState(true)
-
-    useEffect(() => {
-      setTimeout(() => {
-        setFade(false)
-      }, 300)
-    }, [props])
-
-    return (
-      <Slide visible={fade}>
-        <GatsbyImage fluid={image} imgStyle={{ objectFit: "contain" }} />
-      </Slide>
+  useEffect(() => {
+    const introFadeId = setTimeout(() => setFade(true), 750)
+    const id = setTimeout(
+      () => setIndex((index + 1) % photos.length),
+      photoDuration
     )
-  }
+    const fadeId = setTimeout(() => setFade(false), photoDuration - 750)
+    return () => {
+      clearTimeout(id)
+      clearTimeout(fadeId)
+      clearTimeout(introFadeId)
+    }
+  }, [index])
+
   return (
     <SlideContainer>
-      <GeneratedSlide image={photos[index].node.childImageSharp.fluid} />
+      <Slide fluid={photos[index].node.childImageSharp.fluid} visible={fade} />
     </SlideContainer>
   )
 }
@@ -97,7 +80,7 @@ const IndexPage = () => {
     <ParallaxProvider>
       <Layout>
         <SEO title="Home" />
-        <Parallax y={[-20, 20]}>
+        <Parallax y={[-50, 50]}>
           <Carousel photos={portfolio.allS3ImageAsset.edges} />
         </Parallax>
       </Layout>
